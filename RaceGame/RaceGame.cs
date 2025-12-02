@@ -90,6 +90,7 @@
             foreach (var car in _menuCars)
             {
                 car.Car.Top += 2;
+
                 if (car.Car.Top > Height)
                 {
                     car.Car.Top = -car.Car.Height;
@@ -100,19 +101,22 @@
 
         private void RaceGameKeyDown(object sender, KeyEventArgs e)
         {
+            int maxSpeed = 21;
+            int moveStep = 9;
+
             if (_carSpeed != 0)
             {
                 if (e.KeyCode == Keys.D && mainCar.Right < this.ClientSize.Width)
                 {
-                    mainCar.Left += 9;
+                    mainCar.Left += moveStep;
                 }
                 else if (e.KeyCode == Keys.A && mainCar.Left > 0)
                 {
-                    mainCar.Left -= 9;
+                    mainCar.Left -= moveStep;
                 }
             }
 
-            if (e.KeyCode == Keys.W && _carSpeed < 21)
+            if (e.KeyCode == Keys.W && _carSpeed < maxSpeed)
             {
                 _carSpeed++;
             }
@@ -144,10 +148,12 @@
 
         private void GameOver()
 		{
-			timerRoad.Stop();
+            int coinsToContinue = 15;
+
+            timerRoad.Stop();
 			timerTowardCars.Stop();
 
-			if (_coinsCount < 15)
+			if (_coinsCount < coinsToContinue)
 			{
 				DialogResult dd = MessageBox.Show("Game Over!", "Приехали!");
 				panelPause.Show();
@@ -220,8 +226,9 @@
 
 		private void ButtonHelpClick(object sender, EventArgs e)
 		{
-			Help.ShowHelp(this, @"C:\Users\khha4\Race\help.chm", HelpNavigator.TableOfContents);
-		}
+            string helpPath = Path.Combine(Application.StartupPath, "help.chm");
+            Help.ShowHelp(this, helpPath, HelpNavigator.TableOfContents);
+        }
 
 		private void ButtonMenuExitClick(object sender, EventArgs e)
 		{

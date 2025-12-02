@@ -32,6 +32,11 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RaceGame));
             timerRoad = new System.Windows.Forms.Timer(components);
             panelGame = new Panel();
+            panelPause = new Panel();
+            buttonExit = new Button();
+            buttonResume = new Button();
+            pictureFlag = new PictureBox();
+            labelPause = new Label();
             labelScore = new Label();
             labelCoins = new Label();
             label = new Label();
@@ -56,11 +61,6 @@
             MiddleLane = new Label();
             timerTowardCars = new System.Windows.Forms.Timer(components);
             timerMenu = new System.Windows.Forms.Timer(components);
-            labelPause = new Label();
-            pictureFlag = new PictureBox();
-            buttonResume = new Button();
-            buttonExit = new Button();
-            panelPause = new Panel();
             label12 = new Label();
             MenuOneLane1 = new Label();
             MenuOneLane2 = new Label();
@@ -81,6 +81,8 @@
             buttonHelp = new Button();
             panelMenu = new Panel();
             panelGame.SuspendLayout();
+            panelPause.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureFlag).BeginInit();
             ((System.ComponentModel.ISupportInitialize)towardCar2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)towardCar1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)towardCar3).BeginInit();
@@ -88,8 +90,6 @@
             ((System.ComponentModel.ISupportInitialize)Coin2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Coin1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)mainCar).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureFlag).BeginInit();
-            panelPause.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)CarMenu2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)CarMenu3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)CarMenu1).BeginInit();
@@ -133,6 +133,67 @@
             panelGame.Name = "panelGame";
             panelGame.Size = new Size(448, 650);
             panelGame.TabIndex = 0;
+            // 
+            // panelPause
+            // 
+            panelPause.BackColor = SystemColors.ControlDarkDark;
+            panelPause.Controls.Add(panelMenu);
+            panelPause.Controls.Add(buttonExit);
+            panelPause.Controls.Add(buttonResume);
+            panelPause.Controls.Add(pictureFlag);
+            panelPause.Controls.Add(labelPause);
+            panelPause.Location = new Point(0, 0);
+            panelPause.Margin = new Padding(4);
+            panelPause.Name = "panelPause";
+            panelPause.Size = new Size(451, 654);
+            panelPause.TabIndex = 57;
+            // 
+            // buttonExit
+            // 
+            buttonExit.Font = new Font("Microsoft YaHei", 15.75F, FontStyle.Bold, GraphicsUnit.Point);
+            buttonExit.Location = new Point(139, 555);
+            buttonExit.Margin = new Padding(4);
+            buttonExit.Name = "buttonExit";
+            buttonExit.Size = new Size(178, 46);
+            buttonExit.TabIndex = 53;
+            buttonExit.Text = "Exit";
+            buttonExit.UseVisualStyleBackColor = true;
+            buttonExit.Click += ButtonExitClick;
+            // 
+            // buttonResume
+            // 
+            buttonResume.Font = new Font("Microsoft YaHei", 22F, FontStyle.Bold, GraphicsUnit.Point);
+            buttonResume.Location = new Point(139, 469);
+            buttonResume.Margin = new Padding(4);
+            buttonResume.Name = "buttonResume";
+            buttonResume.Size = new Size(178, 67);
+            buttonResume.TabIndex = 52;
+            buttonResume.Text = "Resume";
+            buttonResume.UseVisualStyleBackColor = true;
+            buttonResume.Click += ButtonResumeClick;
+            // 
+            // pictureFlag
+            // 
+            pictureFlag.BackColor = SystemColors.ControlDarkDark;
+            pictureFlag.Image = (Image)resources.GetObject("pictureFlag.Image");
+            pictureFlag.Location = new Point(-3, 124);
+            pictureFlag.Margin = new Padding(4);
+            pictureFlag.Name = "pictureFlag";
+            pictureFlag.Size = new Size(451, 364);
+            pictureFlag.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureFlag.TabIndex = 55;
+            pictureFlag.TabStop = false;
+            // 
+            // labelPause
+            // 
+            labelPause.AutoSize = true;
+            labelPause.Font = new Font("Microsoft YaHei", 90F, FontStyle.Bold, GraphicsUnit.Point);
+            labelPause.Location = new Point(0, 0);
+            labelPause.Margin = new Padding(4, 0, 4, 0);
+            labelPause.Name = "labelPause";
+            labelPause.Size = new Size(422, 159);
+            labelPause.TabIndex = 54;
+            labelPause.Text = "Pause";
             // 
             // labelScore
             // 
@@ -402,67 +463,6 @@
             timerMenu.Interval = 1;
             timerMenu.Tick += TimerMenuTick;
             // 
-            // labelPause
-            // 
-            labelPause.AutoSize = true;
-            labelPause.Font = new Font("Microsoft YaHei", 90F, FontStyle.Bold, GraphicsUnit.Point);
-            labelPause.Location = new Point(0, 0);
-            labelPause.Margin = new Padding(4, 0, 4, 0);
-            labelPause.Name = "labelPause";
-            labelPause.Size = new Size(422, 159);
-            labelPause.TabIndex = 54;
-            labelPause.Text = "Pause";
-            // 
-            // pictureFlag
-            // 
-            pictureFlag.BackColor = SystemColors.ControlDarkDark;
-            pictureFlag.Image = (Image)resources.GetObject("pictureFlag.Image");
-            pictureFlag.Location = new Point(-3, 124);
-            pictureFlag.Margin = new Padding(4);
-            pictureFlag.Name = "pictureFlag";
-            pictureFlag.Size = new Size(451, 364);
-            pictureFlag.SizeMode = PictureBoxSizeMode.Zoom;
-            pictureFlag.TabIndex = 55;
-            pictureFlag.TabStop = false;
-            // 
-            // buttonResume
-            // 
-            buttonResume.Font = new Font("Microsoft YaHei", 22F, FontStyle.Bold, GraphicsUnit.Point);
-            buttonResume.Location = new Point(139, 469);
-            buttonResume.Margin = new Padding(4);
-            buttonResume.Name = "buttonResume";
-            buttonResume.Size = new Size(178, 67);
-            buttonResume.TabIndex = 52;
-            buttonResume.Text = "Resume";
-            buttonResume.UseVisualStyleBackColor = true;
-            buttonResume.Click += ButtonResumeClick;
-            // 
-            // buttonExit
-            // 
-            buttonExit.Font = new Font("Microsoft YaHei", 15.75F, FontStyle.Bold, GraphicsUnit.Point);
-            buttonExit.Location = new Point(139, 555);
-            buttonExit.Margin = new Padding(4);
-            buttonExit.Name = "buttonExit";
-            buttonExit.Size = new Size(178, 46);
-            buttonExit.TabIndex = 53;
-            buttonExit.Text = "Exit";
-            buttonExit.UseVisualStyleBackColor = true;
-            buttonExit.Click += ButtonExitClick;
-            // 
-            // panelPause
-            // 
-            panelPause.BackColor = SystemColors.ControlDarkDark;
-            panelPause.Controls.Add(panelMenu);
-            panelPause.Controls.Add(buttonExit);
-            panelPause.Controls.Add(buttonResume);
-            panelPause.Controls.Add(pictureFlag);
-            panelPause.Controls.Add(labelPause);
-            panelPause.Location = new Point(0, 0);
-            panelPause.Margin = new Padding(4);
-            panelPause.Name = "panelPause";
-            panelPause.Size = new Size(451, 654);
-            panelPause.TabIndex = 57;
-            // 
             // label12
             // 
             label12.BackColor = Color.White;
@@ -714,6 +714,9 @@
             KeyDown += RaceGameKeyDown;
             panelGame.ResumeLayout(false);
             panelGame.PerformLayout();
+            panelPause.ResumeLayout(false);
+            panelPause.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureFlag).EndInit();
             ((System.ComponentModel.ISupportInitialize)towardCar2).EndInit();
             ((System.ComponentModel.ISupportInitialize)towardCar1).EndInit();
             ((System.ComponentModel.ISupportInitialize)towardCar3).EndInit();
@@ -721,9 +724,6 @@
             ((System.ComponentModel.ISupportInitialize)Coin2).EndInit();
             ((System.ComponentModel.ISupportInitialize)Coin1).EndInit();
             ((System.ComponentModel.ISupportInitialize)mainCar).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureFlag).EndInit();
-            panelPause.ResumeLayout(false);
-            panelPause.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)CarMenu2).EndInit();
             ((System.ComponentModel.ISupportInitialize)CarMenu3).EndInit();
             ((System.ComponentModel.ISupportInitialize)CarMenu1).EndInit();
@@ -760,6 +760,10 @@
 		private System.Windows.Forms.Label labelScore;
 		private System.Windows.Forms.Label label;
         private Panel panelPause;
+        private Button buttonExit;
+        private Button buttonResume;
+        private PictureBox pictureFlag;
+        private Label labelPause;
         private Panel panelMenu;
         private Button buttonHelp;
         private Button buttonMenuExit;
@@ -779,9 +783,5 @@
         private Label MenuOneLane2;
         private Label MenuOneLane1;
         private Label label12;
-        private Button buttonExit;
-        private Button buttonResume;
-        private PictureBox pictureFlag;
-        private Label labelPause;
     }
 }
