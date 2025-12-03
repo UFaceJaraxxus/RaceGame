@@ -42,7 +42,8 @@
 
         private void TimerRoadTick(object sender, EventArgs e)
 		{
-			labelScore.Text = "Score: " + _score / 10;
+            int scoreDivider = 10;
+            labelScore.Text = "Score: " + _score / scoreDivider;
             _gameRoad.Speed = _carSpeed;
 
             _gameRoad.Refresh();
@@ -85,11 +86,12 @@
 
         private void TimerMenuTick(object sender, EventArgs e)
         {
+            int menuCarSpeed = 2;
             _menuRoad.Refresh();
 
             foreach (var car in _menuCars)
             {
-                car.Car.Top += 2;
+                car.Car.Top += menuCarSpeed;
 
                 if (car.Car.Top > Height)
                 {
