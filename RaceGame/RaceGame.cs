@@ -1,15 +1,25 @@
-﻿namespace Race
+﻿using System.Media;
+
+namespace Race
 {
-	public partial class RaceGame : Form
-	{
+    public partial class RaceGame : Form
+    {
+        public static string UserStatisticPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Статистика игры.json");
+        public static List<UserGameRecord> GameStatistic = FileManager.DeserializeFromFile<List<UserGameRecord>>(UserStatisticPath) ?? new List<UserGameRecord>();
+        public string MusicPath = Path.Combine(Application.StartupPath, "Resources", "Course Intro (Jingle).wav");
+
         private int _score = 0;
         private int _coinsCount = 0;
         private int _carSpeed = 2;
 
-		private PictureBox[] _coins = new PictureBox[3];
+        private User _user;
+        private UserGameRecord _userGameRecord;
+        private SoundPlayer _backgroundMusic;
+
+        private PictureBox[] _coins = new PictureBox[3];
 
         private Label[] _gameLines = new Label[10];
-		private MovingCar[] _gameCars = new MovingCar[3];
+        private MovingCar[] _gameCars = new MovingCar[3];
         private Road _gameRoad;
 
         private Label[] _menuLanes = new Label[10];
@@ -21,6 +31,11 @@
         public RaceGame()
         {
             InitializeComponent();
+
+            if (File.Exists(MusicPath))
+            {
+                _backgroundMusic = new SoundPlayer(MusicPath);
+            }
         }
 
         private void RaceGameLoad(object sender, EventArgs e)
@@ -38,68 +53,11 @@
             timerRoad.Stop();
             timerTowardCars.Stop();
             panelMenu.Show();
+            _backgroundMusic.PlayLooping();
+            panelStatistics.Hide();
         }
 
-        private void TimerRoadTick(object sender, EventArgs e)
-		{
-            int scoreDivider = 10;
-            labelScore.Text = "Score: " + _score / scoreDivider;
-            _gameRoad.Speed = _carSpeed;
-
-            _gameRoad.Refresh();
-
-            if (_carSpeed != 0)
-            {
-                _score++;
-            }
-
-			foreach (var coin in _coins)
-			{
-				coin.Top += _carSpeed;
-
-				if (coin.Top > Height)
-				{
-					GenerateCoin(coin);
-				}
-			}
-
-            CollectCoins();
-		}
-
-        private void TimerTowardCarsTick(object sender, EventArgs e)
-        {
-            foreach (var towardCar in _gameCars)
-            {
-                towardCar.Car.Top += _carSpeed + towardCar.IncreaseSpeed;
-
-                if (towardCar.Car.Top > Height)
-                {
-                    RespawnCar(towardCar, _gameCars);
-                }
-
-                if (mainCar.Bounds.IntersectsWith(towardCar.Car.Bounds))
-                {
-                    GameOver();
-                }                    
-            }
-        }
-
-        private void TimerMenuTick(object sender, EventArgs e)
-        {
-            int menuCarSpeed = 2;
-            _menuRoad.Refresh();
-
-            foreach (var car in _menuCars)
-            {
-                car.Car.Top += menuCarSpeed;
-
-                if (car.Car.Top > Height)
-                {
-                    car.Car.Top = -car.Car.Height;
-                    car.Car.Left = _random.Next(0, Width - car.Car.Width);
-                }
-            }
-        }
+        #region Игровая логика
 
         private void RaceGameKeyDown(object sender, KeyEventArgs e)
         {
@@ -108,13 +66,25 @@
 
             if (_carSpeed != 0)
             {
-                if (e.KeyCode == Keys.D && mainCar.Right < this.ClientSize.Width)
+                if (e.KeyCode == Keys.D)
                 {
                     mainCar.Left += moveStep;
                 }
-                else if (e.KeyCode == Keys.A && mainCar.Left > 0)
+                else if (e.KeyCode == Keys.A)
                 {
                     mainCar.Left -= moveStep;
+                }
+
+                int carHalfWidth = mainCar.Width / 2;
+                int carCenterX = mainCar.Left + carHalfWidth;
+
+                if (mainCar.Left > this.ClientSize.Width - carHalfWidth)
+                {
+                    mainCar.Left = -carHalfWidth;
+                }
+                else if (mainCar.Right < carHalfWidth)
+                {
+                    mainCar.Left = this.ClientSize.Width - carHalfWidth;
                 }
             }
 
@@ -136,111 +106,22 @@
         }
 
         void CollectCoins()
-		{
-			foreach (var coin in _coins)
-			{
-				if (mainCar.Bounds.IntersectsWith(coin.Bounds))
-				{
-					_coinsCount++;
+        {
+            foreach (var coin in _coins)
+            {
+                if (mainCar.Bounds.IntersectsWith(coin.Bounds))
+                {
+                    _coinsCount++;
                     labelCoins.Text = "Coins: " + _coinsCount;
-					GenerateCoin(coin);
+                    GenerateCoin(coin);
                 }
-			}
-		}
+            }
+        }
 
-        private void GameOver()
-		{
-            int coinsToContinue = 15;
-
-            timerRoad.Stop();
-			timerTowardCars.Stop();
-
-			if (_coinsCount < coinsToContinue)
-			{
-				DialogResult dd = MessageBox.Show("Game Over!", "Приехали!");
-				panelPause.Show();
-				panelMenu.Show();
-			}
-			else
-			{
-				DialogResult dr = MessageBox.Show("Продолжить? (-15 coins)", "Приехали!",
-				MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-				if (dr == DialogResult.Yes)
-                {
-                    Restart();
-                }
-                else if (dr == DialogResult.No)
-                {
-                    panelPause.Show();
-                    panelMenu.Show();
-                }
-			}
-		}
-
-        private void StartGame()
+        public void GenerateCoin(PictureBox coin)
         {
-            _score = 0;
-            _coinsCount = 0;
-            labelCoins.Text = "Coins: " + _coinsCount;
-            _carSpeed = 2;
-            timerRoad.Start();
-            timerTowardCars.Start();
-            GenerateCars(_gameCars);
-            panelGame.Show();
-            panelPause.Hide();
-            panelMenu.Hide();
-        }
-
-        private void Restart()
-		{
-			_coinsCount -= 15;
-			labelCoins.Text = "Coins: " + _coinsCount;
-			_carSpeed = 2;
-			timerRoad.Start();
-			timerTowardCars.Start();
-            GenerateCars(_gameCars);
-        }
-
-		private void ButtonPauseClick(object sender, EventArgs e)
-		{
-
-			timerRoad.Enabled = false;
-			timerTowardCars.Enabled = false;
-			panelPause.Show();
-		}
-
-        private void ButtonStartClick(object sender, EventArgs e)
-        {
-            StartGame();
-        }
-
-        private void ButtonResumeClick(object sender, EventArgs e)
-		{
-			timerRoad.Enabled = true;
-			timerTowardCars.Enabled = true;
-			panelPause.Hide();
-		}
-
-		private void ButtonExitClick(object sender, EventArgs e)
-		{
-			panelMenu.Show();
-		}
-
-		private void ButtonHelpClick(object sender, EventArgs e)
-		{
-            string helpPath = Path.Combine(Application.StartupPath, "help.chm");
-            Help.ShowHelp(this, helpPath, HelpNavigator.TableOfContents);
-        }
-
-		private void ButtonMenuExitClick(object sender, EventArgs e)
-		{
-			this.Close();
-		}
-		
-		public void GenerateCoin(PictureBox coin)
-		{
-                coin.Top = -coin.Height;
-                coin.Left = _random.Next(0, Width - coin.Width);
+            coin.Top = -coin.Height;
+            coin.Left = _random.Next(0, Width - coin.Width);
         }
 
         private void GenerateCars(MovingCar[] cars)
@@ -286,5 +167,201 @@
 
             car.IncreaseSpeed = _random.Next(0, 5);
         }
+
+        #region Таймеры
+        private void TimerRoadTick(object sender, EventArgs e)
+        {
+            int scoreDivider = 10;
+            labelScore.Text = "Score: " + _score / scoreDivider;
+            _gameRoad.Speed = _carSpeed;
+
+            _gameRoad.Refresh();
+
+            if (_carSpeed != 0)
+            {
+                _score++;
+            }
+
+            foreach (var coin in _coins)
+            {
+                coin.Top += _carSpeed;
+
+                if (coin.Top > Height)
+                {
+                    GenerateCoin(coin);
+                }
+            }
+
+            CollectCoins();
+        }
+
+        private void TimerTowardCarsTick(object sender, EventArgs e)
+        {
+            foreach (var towardCar in _gameCars)
+            {
+                towardCar.Car.Top += _carSpeed + towardCar.IncreaseSpeed;
+
+                if (towardCar.Car.Top > Height)
+                {
+                    RespawnCar(towardCar, _gameCars);
+                }
+
+                if (mainCar.Bounds.IntersectsWith(towardCar.Car.Bounds))
+                {
+                    GameOver();
+                }
+            }
+        }
+
+        private void TimerMenuTick(object sender, EventArgs e)
+        {
+            int menuCarSpeed = 2;
+            _menuRoad.Refresh();
+
+            foreach (var car in _menuCars)
+            {
+                car.Car.Top += menuCarSpeed;
+
+                if (car.Car.Top > Height)
+                {
+                    car.Car.Top = -car.Car.Height;
+                    car.Car.Left = _random.Next(0, Width - car.Car.Width);
+                }
+            }
+        }
+        #endregion
+
+        #region Запуск и окончание игры
+        private void StartGame()
+        {
+            _score = 0;
+            _coinsCount = 0;
+            labelCoins.Text = "Coins: " + _coinsCount;
+            _carSpeed = 2;
+            timerRoad.Start();
+            timerTowardCars.Start();
+            GenerateCars(_gameCars);
+            panelGame.Show();
+            panelPause.Hide();
+            panelMenu.Hide();
+        }
+
+        private void Restart()
+        {
+            _coinsCount -= 15;
+            labelCoins.Text = "Coins: " + _coinsCount;
+            _carSpeed = 2;
+            timerRoad.Start();
+            timerTowardCars.Start();
+            GenerateCars(_gameCars);
+        }
+
+        private void GameOver()
+        {
+            int coinsToContinue = 15;
+
+            timerRoad.Stop();
+            timerTowardCars.Stop();
+
+            if (_coinsCount < coinsToContinue)
+            {
+                DialogResult dd = MessageBox.Show("Game Over!", "Приехали!");
+                RecordResult();
+                panelPause.Show();
+                panelMenu.Show();
+            }
+            else
+            {
+                DialogResult dr = MessageBox.Show("Продолжить? (-15 coins)", "Приехали!",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (dr == DialogResult.Yes)
+                {
+                    Restart();
+                }
+                else if (dr == DialogResult.No)
+                {
+                    RecordResult();
+                    panelPause.Show();
+                    panelMenu.Show();
+                }
+            }
+        }
+        #endregion
+
+        #endregion
+
+        #region Логика статистики
+
+        private void RecordResult()
+        {
+            _userGameRecord = new UserGameRecord(_user, _score / 10, _coinsCount, DateTime.Now);
+            GameStatistic.Add(_userGameRecord);
+            FileManager.SerializeToFile(GameStatistic, UserStatisticPath);
+        }
+
+        private void OpenStatistic()
+        {
+            dataGridViewStatistics.Rows.Clear();
+            var usersRecord = FileManager.DeserializeFromFile<List<UserGameRecord>>(UserStatisticPath) ?? new List<UserGameRecord>();
+
+            foreach (var record in usersRecord)
+            {
+                dataGridViewStatistics.Rows.Add(record.Player.Nickname, record.Score, record.Coins, record.RecordDate);
+            }
+        }
+
+        #endregion
+
+        #region Кнопки
+
+        private void ButtonPauseClick(object sender, EventArgs e)
+        {
+
+            timerRoad.Enabled = false;
+            timerTowardCars.Enabled = false;
+            panelPause.Show();
+        }
+
+        private void ButtonStartClick(object sender, EventArgs e)
+        {
+            StartGame();
+            _user = new User(textBoxName.Text);
+        }
+
+        private void ButtonResumeClick(object sender, EventArgs e)
+        {
+            timerRoad.Enabled = true;
+            timerTowardCars.Enabled = true;
+            panelPause.Hide();
+        }
+
+        private void ButtonStatisticsClick(object sender, EventArgs e)
+        {
+            panelStatistics.Show();
+            OpenStatistic();
+        }
+
+        private void ButtonReturnToMenuClick(object sender, EventArgs e)
+        {
+            panelStatistics.Hide();
+        }
+
+        private void ButtonExitClick(object sender, EventArgs e)
+        {
+            panelMenu.Show();
+        }
+
+        private void ButtonHelpClick(object sender, EventArgs e)
+        {
+            string helpPath = Path.Combine(Application.StartupPath, "help.chm");
+            Help.ShowHelp(this, helpPath, HelpNavigator.TableOfContents);
+        }
+
+        private void ButtonMenuExitClick(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        #endregion
     }
 }
